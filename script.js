@@ -1,23 +1,18 @@
-// ═══════════════════════════════════════
-//   FITEC — script.js
-//   Lógica del sitio público (index.html)
-// ═══════════════════════════════════════
-
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
+
+// ⚠️ Reemplazá estos valores con los de tu proyecto Supabase
+const SUPABASE_URL  = 'https://dvqwzttgskkorfhtdavu.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2cXd6dHRnc2trb3JmaHRkYXZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTc1NTYsImV4cCI6MjA5MzU3MzU1Nn0.JaBMkSUiwms1oRtk9wsomB5XW3ssrQMplLaMf7K-OtE';
 
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ── HELPERS ───────────────────────────────────────────────────
 function imgUrl(path) {
   if (!path) return null;
   return `${SUPABASE_URL}/storage/v1/object/public/fitec-images/${path}`;
 }
 
-// ── STATE ─────────────────────────────────────────────────────
 let detailBackPage = 'index';
 
-// ── NAVIGATION ────────────────────────────────────────────────
 window.goTo = function (pageId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const target = document.getElementById('page-' + pageId);
@@ -31,7 +26,6 @@ window.goTo = function (pageId) {
   if (btn) btn.classList.add('active');
 };
 
-// ── RENDER GRIDS ──────────────────────────────────────────────
 function renderGrid(items, gridId, backPage) {
   const grid = document.getElementById(gridId);
   if (!grid) return;
@@ -55,7 +49,6 @@ function renderGrid(items, gridId, backPage) {
   });
 }
 
-// ── SHOW DETAIL ───────────────────────────────────────────────
 function showDetail(item, backPage) {
   detailBackPage = backPage;
 
@@ -64,7 +57,6 @@ function showDetail(item, backPage) {
   document.getElementById('detail-desc').textContent  = item.descripcion  || '';
   document.getElementById('detail-desc2').textContent = item.descripcion2 || '';
 
-  // Imagen principal
   const detailImg = document.getElementById('detail-img');
   if (item.imagen_principal) {
     detailImg.innerHTML = `<img src="${imgUrl(item.imagen_principal)}" alt="${item.nombre}" style="width:100%;height:100%;object-fit:cover;">`;
@@ -72,7 +64,6 @@ function showDetail(item, backPage) {
     detailImg.innerHTML = `<div class="ph-box" style="height:100%;"><span>/img ${item.nombre}</span></div>`;
   }
 
-  // Specs
   const specsEl = document.getElementById('detail-specs');
   specsEl.innerHTML = '';
   if (item.specs && typeof item.specs === 'object') {
@@ -86,7 +77,6 @@ function showDetail(item, backPage) {
     });
   }
 
-  // Galería extra
   const gallery = document.getElementById('detail-gallery');
   gallery.innerHTML = '';
   if (item.galeria && item.galeria.length > 0) {
@@ -103,9 +93,7 @@ function showDetail(item, backPage) {
   goTo('detail');
 }
 
-// ── INIT ──────────────────────────────────────────────────────
 async function init() {
-  // Textos de la home
   const { data: textos, error: texError } = await db
     .from('textos_home')
     .select('*')
@@ -121,7 +109,6 @@ async function init() {
     if (texError) console.warn('textos_home:', texError.message);
   }
 
-  // Cabinas
   const { data: cabinas } = await db
     .from('productos')
     .select('*')
@@ -136,7 +123,6 @@ async function init() {
       `<img src="${imgUrl(cabinas[0].imagen_principal)}" style="width:100%;height:100%;object-fit:cover;">`;
   }
 
-  // Campers
   const { data: campers } = await db
     .from('productos')
     .select('*')
@@ -151,7 +137,6 @@ async function init() {
       `<img src="${imgUrl(campers[0].imagen_principal)}" style="width:100%;height:100%;object-fit:cover;">`;
   }
 
-  // Nav inicial
   document.getElementById('nav-index').classList.add('active');
 }
 

@@ -4,24 +4,26 @@
 // ═══════════════════════════════════════
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-import { SUPABASE_URL, SUPABASE_KEY, ADMIN_PASS } from './config.js';
+
+// ⚠️ Reemplazá estos valores con los de tu proyecto Supabase
+const SUPABASE_URL  = 'https://dvqwzttgskkorfhtdavu.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2cXd6dHRnc2trb3JmaHRkYXZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTc1NTYsImV4cCI6MjA5MzU3MzU1Nn0.JaBMkSUiwms1oRtk9wsomB5XW3ssrQMplLaMf7K-OtE';
+
+const ADMIN_PASS   = 'fitec2025';
 
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ── HELPERS ───────────────────────────────────────────────────
 function imgUrl(path) {
   if (!path) return null;
   return `${SUPABASE_URL}/storage/v1/object/public/fitec-images/${path}`;
 }
 
-// ── STATE ─────────────────────────────────────────────────────
 let currentCategoria = 'cabina';
 let editingId        = null;
-let pendingFiles     = [];   // archivos nuevos a subir
-let existingImages   = [];   // paths ya guardados en Supabase
-let removedImages    = [];   // paths a borrar del storage
+let pendingFiles     = [];
+let existingImages   = [];
+let removedImages    = [];
 
-// ── LOGIN ─────────────────────────────────────────────────────
 window.doLogin = function () {
   const pass = document.getElementById('login-pass').value;
   if (pass === ADMIN_PASS) {
@@ -43,7 +45,6 @@ window.doLogout = function () {
   document.getElementById('login-pass').value = '';
 };
 
-// ── TABS ──────────────────────────────────────────────────────
 window.setTab = function (tab) {
   const names = ['cabinas', 'campers', 'home'];
   document.querySelectorAll('.tab').forEach((t, i) => {
@@ -53,7 +54,6 @@ window.setTab = function (tab) {
   document.getElementById('tab-' + tab).classList.add('active');
 };
 
-// ── TOAST ─────────────────────────────────────────────────────
 function toast(msg, type = '') {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -61,7 +61,6 @@ function toast(msg, type = '') {
   setTimeout(() => { el.className = ''; }, 3000);
 }
 
-// ── LOAD ALL ──────────────────────────────────────────────────
 async function loadAll() {
   await loadProductos('cabina', 'grid-cabinas');
   await loadProductos('camper', 'grid-campers');
@@ -76,10 +75,7 @@ async function loadProductos(cat, gridId) {
     .order('orden', { ascending: true });
 
   const grid = document.getElementById(gridId);
-  if (error) {
-    grid.innerHTML = `<p style="color:var(--danger);">Error al cargar</p>`;
-    return;
-  }
+  if (error) { grid.innerHTML = `<p style="color:var(--danger);">Error al cargar</p>`; return; }
   if (!data || data.length === 0) {
     grid.innerHTML = `<p style="color:var(--muted);padding:40px 0;">Sin modelos aún. ¡Agregá el primero!</p>`;
     return;
@@ -121,7 +117,6 @@ async function loadTextos() {
   }
 }
 
-// ── MODAL ─────────────────────────────────────────────────────
 window.openModal = function (cat) {
   currentCategoria = cat;
   editingId        = null;
@@ -129,14 +124,14 @@ window.openModal = function (cat) {
   existingImages   = [];
   removedImages    = [];
 
-  document.getElementById('modal-title').textContent    = cat === 'cabina' ? 'Nueva cabina' : 'Nuevo camper';
-  document.getElementById('f-nombre').value             = '';
-  document.getElementById('f-orden').value              = '1';
-  document.getElementById('f-desc').value               = '';
-  document.getElementById('f-desc2').value              = '';
-  document.getElementById('f-activo').checked           = true;
-  document.getElementById('specs-builder').innerHTML    = '';
-  document.getElementById('img-preview').innerHTML      = '';
+  document.getElementById('modal-title').textContent = cat === 'cabina' ? 'Nueva cabina' : 'Nuevo camper';
+  document.getElementById('f-nombre').value          = '';
+  document.getElementById('f-orden').value           = '1';
+  document.getElementById('f-desc').value            = '';
+  document.getElementById('f-desc2').value           = '';
+  document.getElementById('f-activo').checked        = true;
+  document.getElementById('specs-builder').innerHTML = '';
+  document.getElementById('img-preview').innerHTML   = '';
   addSpecRow();
 
   document.getElementById('product-modal').classList.add('open');
@@ -163,7 +158,6 @@ window.editProducto = async function (id) {
   document.getElementById('f-desc2').value           = item.descripcion2 || '';
   document.getElementById('f-activo').checked        = item.activo;
 
-  // Specs
   document.getElementById('specs-builder').innerHTML = '';
   if (item.specs && typeof item.specs === 'object') {
     Object.entries(item.specs).forEach(([k, v]) => addSpecRow(k, v));
@@ -171,7 +165,6 @@ window.editProducto = async function (id) {
     addSpecRow();
   }
 
-  // Preview imágenes existentes
   const preview = document.getElementById('img-preview');
   preview.innerHTML = '';
   const allImgs = item.imagen_principal
@@ -182,7 +175,6 @@ window.editProducto = async function (id) {
   document.getElementById('product-modal').classList.add('open');
 };
 
-// ── SPECS ─────────────────────────────────────────────────────
 window.addSpecRow = function (key = '', val = '') {
   const builder = document.getElementById('specs-builder');
   const row = document.createElement('div');
@@ -206,7 +198,6 @@ function getSpecs() {
   return specs;
 }
 
-// ── IMAGES ────────────────────────────────────────────────────
 window.handleImgSelect = function (e) {
   Array.from(e.target.files).forEach(file => {
     pendingFiles.push(file);
@@ -276,7 +267,6 @@ function updatePrimaryBadge() {
   });
 }
 
-// ── SAVE PRODUCTO ─────────────────────────────────────────────
 window.saveProducto = async function () {
   const nombre = document.getElementById('f-nombre').value.trim();
   if (!nombre) { toast('El nombre es obligatorio', 'error'); return; }
@@ -286,7 +276,6 @@ window.saveProducto = async function () {
   btn.disabled  = true;
 
   try {
-    // 1. Subir imágenes nuevas al storage
     const newPaths = [];
     for (const file of pendingFiles.filter(Boolean)) {
       const ext  = file.name.split('.').pop();
@@ -296,12 +285,10 @@ window.saveProducto = async function () {
       newPaths.push(path);
     }
 
-    // 2. Borrar imágenes eliminadas del storage
     for (const path of removedImages) {
       await db.storage.from('fitec-images').remove([path]);
     }
 
-    // 3. Construir orden final de imágenes según el preview
     const orderedPaths = [];
     let newIdx = 0;
     document.querySelectorAll('#img-preview .img-preview-item').forEach(item => {
@@ -314,12 +301,12 @@ window.saveProducto = async function () {
 
     const payload = {
       nombre,
-      categoria:       currentCategoria,
-      orden:           parseInt(document.getElementById('f-orden').value) || 1,
-      descripcion:     document.getElementById('f-desc').value.trim(),
-      descripcion2:    document.getElementById('f-desc2').value.trim(),
-      specs:           getSpecs(),
-      activo:          document.getElementById('f-activo').checked,
+      categoria:        currentCategoria,
+      orden:            parseInt(document.getElementById('f-orden').value) || 1,
+      descripcion:      document.getElementById('f-desc').value.trim(),
+      descripcion2:     document.getElementById('f-desc2').value.trim(),
+      specs:            getSpecs(),
+      activo:           document.getElementById('f-activo').checked,
       imagen_principal: orderedPaths[0] || null,
       galeria:          orderedPaths.slice(1),
     };
@@ -345,7 +332,6 @@ window.saveProducto = async function () {
   }
 };
 
-// ── DELETE ────────────────────────────────────────────────────
 window.deleteProducto = async function (id, nombre) {
   if (!confirm(`¿Borrar "${nombre}"? Esta acción no se puede deshacer.`)) return;
 
@@ -364,7 +350,6 @@ window.deleteProducto = async function (id, nombre) {
   loadAll();
 };
 
-// ── TEXTOS HOME ───────────────────────────────────────────────
 window.saveTextos = async function () {
   const { error } = await db.from('textos_home').upsert({
     id:            1,
