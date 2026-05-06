@@ -90,6 +90,14 @@ function showDetail(item, backPage) {
   }
 
   document.getElementById('detail-back-btn').onclick = () => goTo(detailBackPage);
+
+  // Actualizar link de WhatsApp con el modelo en el mensaje
+  const waLink = document.getElementById('whatsapp-link');
+  if (waLink && window._fitecTelefono) {
+    const msg = encodeURIComponent(`Hola, me interesa el ${item.categoria} "${item.nombre}". ¿Podrían darme más información?`);
+    waLink.href = `https://wa.me/${window._fitecTelefono}?text=${msg}`;
+  }
+
   goTo('detail');
 }
 
@@ -103,6 +111,15 @@ async function init() {
   if (textos) {
     document.getElementById('texto-quienes').textContent = textos.quienes_somos || '';
     document.getElementById('texto-que').textContent     = textos.que_hacemos   || '';
+    window._fitecTelefono = textos.telefono || '';
+
+    // Foto hero
+    if (textos.hero_imagen) {
+      const heroBg = document.getElementById('hero-bg');
+      heroBg.innerHTML = `<img src="${imgUrl(textos.hero_imagen)}" style="width:100%;height:100%;object-fit:cover;">`;
+      heroBg.style.opacity = '1';
+      heroBg.style.background = 'none';
+    }
   } else {
     document.getElementById('texto-quienes').textContent = '';
     document.getElementById('texto-que').textContent     = '';

@@ -284,7 +284,7 @@
     <div class="tabs">
       <button class="tab active" onclick="setTab('cabinas')">Cabinas</button>
       <button class="tab" onclick="setTab('campers')">Campers</button>
-      <button class="tab" onclick="setTab('home')">Textos home</button>
+      <button class="tab" onclick="setTab('home')">Textos</button>
     </div>
 
     <!-- CABINAS -->
@@ -311,22 +311,76 @@
 
     <!-- HOME -->
     <div class="section" id="tab-home">
-      <div class="section-header">
-        <h2 class="section-title">TEXTOS HOME</h2>
+  <div class="section-header">
+    <h2 class="section-title">CONFIGURACIÓN</h2>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px;max-width:680px;">
+
+    <!-- Textos -->
+    <div class="home-form">
+      <h3>Textos principales</h3>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>¿Quiénes somos?</label>
+        <textarea id="txt-quienes" rows="4"></textarea>
       </div>
-      <div class="home-form">
-        <h3>¿Quiénes somos? / ¿Qué hacemos?</h3>
-        <div class="form-group" style="margin-bottom:16px;">
-          <label>¿Quiénes somos?</label>
-          <textarea id="txt-quienes" rows="4"></textarea>
-        </div>
-        <div class="form-group" style="margin-bottom:20px;">
-          <label>¿Qué hacemos?</label>
-          <textarea id="txt-que" rows="4"></textarea>
-        </div>
-        <button class="btn-sm btn-accent" style="padding:10px 24px;font-size:14px;" onclick="saveTextos()">Guardar textos</button>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>¿Qué hacemos?</label>
+        <textarea id="txt-que" rows="4"></textarea>
       </div>
+      <button class="btn-sm btn-accent" style="padding:10px 24px;font-size:14px;" onclick="saveTextos()">Guardar textos</button>
     </div>
+    <!-- Cambiar contraseña -->
+    <div class="home-form" style="margin-top:20px;">
+      <h3>Cambiar contraseña</h3>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Contraseña actual</label>
+        <input type="password" id="pass-actual" placeholder="Contraseña actual">
+      </div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Nueva contraseña</label>
+        <input type="password" id="pass-nueva" placeholder="Nueva contraseña">
+      </div>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>Repetir nueva contraseña</label>
+        <input type="password" id="pass-repetir" placeholder="Repetir nueva contraseña">
+      </div>
+      <button class="btn-sm btn-accent" style="padding:10px 24px;font-size:14px;" onclick="cambiarPassword()">Cambiar contraseña</button>
+    </div>
+
+    <!-- Teléfono WhatsApp -->
+    <div class="home-form">
+      <h3>WhatsApp de contacto</h3>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>Número (con código de país, sin + ni espacios)</label>
+        <input type="text" id="txt-telefono" placeholder="ej: 5493624123456">
+        <span style="font-size:12px;color:var(--muted);margin-top:4px;">
+          Argentina: 549 + código de área + número. Ej: 5493624123456
+        </span>
+      </div>
+      <button class="btn-sm btn-accent" style="padding:10px 24px;font-size:14px;" onclick="saveTelefono()">Guardar teléfono</button>
+    </div>
+
+    <!-- Cambiar contraseña -->
+    <div class="home-form">
+      <h3>Cambiar contraseña</h3>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Contraseña actual</label>
+        <input type="password" id="pass-actual" placeholder="Contraseña actual">
+      </div>
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>Nueva contraseña</label>
+        <input type="password" id="pass-nueva" placeholder="Nueva contraseña">
+      </div>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label>Repetir nueva contraseña</label>
+        <input type="password" id="pass-repetir" placeholder="Repetir nueva contraseña">
+      </div>
+      <button class="btn-sm btn-accent" style="padding:10px 24px;font-size:14px;" onclick="cambiarPassword()">Cambiar contraseña</button>
+    </div>
+
+  </div>
+</div>
 
   </div>
 </div>

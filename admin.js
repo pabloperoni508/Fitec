@@ -9,8 +9,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const SUPABASE_URL  = 'https://dvqwzttgskkorfhtdavu.supabase.co';
 const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2cXd6dHRnc2trb3JmaHRkYXZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTc1NTYsImV4cCI6MjA5MzU3MzU1Nn0.JaBMkSUiwms1oRtk9wsomB5XW3ssrQMplLaMf7K-OtE';
 
-const ADMIN_PASS   = 'fitec2025';
-
+let ADMIN_PASS = 'fitec2025';
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function imgUrl(path) {
@@ -24,8 +23,13 @@ let pendingFiles     = [];
 let existingImages   = [];
 let removedImages    = [];
 
-window.doLogin = function () {
+window.doLogin = async function () {
   const pass = document.getElementById('login-pass').value;
+
+  // Cargar contraseña actual desde Supabase antes de validar
+  const { data } = await db.from('textos_home').select('admin_pass').eq('id', 1).maybeSingle();
+  if (data?.admin_pass) ADMIN_PASS = data.admin_pass;
+
   if (pass === ADMIN_PASS) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-screen').style.display = 'block';
@@ -112,8 +116,10 @@ async function loadProductos(cat, gridId) {
 async function loadTextos() {
   const { data } = await db.from('textos_home').select('*').eq('id', 1).maybeSingle();
   if (data) {
-    document.getElementById('txt-quienes').value = data.quienes_somos || '';
-    document.getElementById('txt-que').value     = data.que_hacemos   || '';
+    document.getElementById('txt-quienes').value  = data.quienes_somos || '';
+    document.getElementById('txt-que').value      = data.que_hacemos   || '';
+    document.getElementById('txt-telefono').value = data.telefono      || '';
+    if (data.admin_pass) ADMIN_PASS = data.admin_pass;
   }
 }
 
@@ -359,4 +365,40 @@ window.saveTextos = async function () {
 
   if (error) { toast('Error al guardar textos', 'error'); return; }
   toast('Textos guardados', 'success');
+};
+
+window.saveTelefono = async function () {
+  const telefono = document.getElementById('txt-telefono').value.trim();
+  if (!telefono) { toast('Ingresá un número', 'error'); return; }
+
+  const { error } = await db.from('textos_home').upsert({
+    id:       1,
+    telefono,
+  }, { onConflict: 'id' });
+
+  if (error) { toast('Error al guardar teléfono', 'error'); return; }
+  toast('Teléfono guardado', 'success');
+};
+
+window.cambiarPassword = async function () {
+  const actual  = document.getElementById('pass-actual').value;
+  const nueva   = document.getElementById('pass-nueva').value;
+  const repetir = document.getElementById('pass-repetir').value;
+
+  if (actual !== ADMIN_PASS) { toast('La contraseña actual es incorrecta', 'error'); return; }
+  if (!nueva)                { toast('Ingresá una nueva contraseña', 'error'); return; }
+  if (nueva !== repetir)     { toast('Las contraseñas no coinciden', 'error'); return; }
+
+  const { error } = await db.from('textos_home').upsert({
+    id:         1,
+    admin_pass: nueva,
+  }, { onConflict: 'id' });
+
+  if (error) { toast('Error al guardar contraseña', 'error'); return; }
+
+  ADMIN_PASS = nueva;
+  document.getElementById('pass-actual').value  = '';
+  document.getElementById('pass-nueva').value   = '';
+  document.getElementById('pass-repetir').value = '';
+  toast('Contraseña cambiada y guardada', 'success');
 };
