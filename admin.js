@@ -22,6 +22,8 @@ let editingId        = null;
 let pendingFiles     = [];
 let existingImages   = [];
 let removedImages    = [];
+let heroImageFile    = null;
+let currentHeroPath  = null;
 
 window.doLogin = async function () {
   const pass = document.getElementById('login-pass').value;
@@ -120,8 +122,81 @@ async function loadTextos() {
     document.getElementById('txt-que').value      = data.que_hacemos   || '';
     document.getElementById('txt-telefono').value = data.telefono      || '';
     if (data.admin_pass) ADMIN_PASS = data.admin_pass;
+    currentHeroPath = data.hero_imagen || null;
+    heroImageFile   = null;
+    document.getElementById('hero-image-name').textContent = currentHeroPath ? 'Imagen actual cargada' : 'Ninguna imagen seleccionada';
+    renderHeroPreview(currentHeroPath ? imgUrl(currentHeroPath) : null);
+  } else {
+    currentHeroPath = null;
+    heroImageFile   = null;
+    document.getElementById('hero-image-name').textContent = 'Ninguna imagen seleccionada';
+    renderHeroPreview(null);
   }
 }
+
+window.handleHeroImageSelect = function (event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  heroImageFile = file;
+  document.getElementById('hero-image-name').textContent = file.name;
+
+  const reader = new FileReader();
+  reader.onload = e => renderHeroPreview(e.target.result);
+  reader.readAsDataURL(file);
+};
+
+function renderHeroPreview(src) {
+  const preview = document.getElementById('hero-preview');
+  if (!preview) return;
+  if (src) {
+    preview.innerHTML = `<img src="${src}" alt="Hero preview" style="width:100%;height:100%;object-fit:cover;display:block;">`;
+  } else {
+    preview.innerHTML = '<span style="padding:16px;text-align:center;display:block;width:100%;">Aún no hay imagen de hero.</span>';
+  }
+}
+
+window.saveHeroImage = async function () {
+  if (!heroImageFile) {
+    toast('Seleccioná una imagen para el hero', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('save-hero-btn');
+  if (btn) {
+    btn.innerHTML = '<span class="spinner"></span> Guardando…';
+    btn.disabled = true;
+  }
+
+  try {
+    const ext  = heroImageFile.name.split('.').pop();
+    const path = `hero/hero_${Date.now()}.${ext}`;
+    const { error: uploadError } = await db.storage.from('fitec-images').upload(path, heroImageFile, { upsert: true });
+    if (uploadError) throw uploadError;
+
+    const { error: dbError } = await db.from('textos_home').upsert({
+      id: 1,
+      hero_imagen: path,
+    }, { onConflict: 'id' });
+    if (dbError) throw dbError;
+
+    if (currentHeroPath && currentHeroPath !== path) {
+      await db.storage.from('fitec-images').remove([currentHeroPath]);
+    }
+
+    currentHeroPath = path;
+    heroImageFile   = null;
+    document.getElementById('hero-image-name').textContent = 'Imagen actual cargada';
+    toast('Hero guardado correctamente', 'success');
+  } catch (err) {
+    console.error(err);
+    toast('Error al guardar el hero: ' + (err.message || 'desconocido'), 'error');
+  } finally {
+    if (btn) {
+      btn.innerHTML = 'Guardar hero';
+      btn.disabled = false;
+    }
+  }
+};
 
 window.openModal = function (cat) {
   currentCategoria = cat;

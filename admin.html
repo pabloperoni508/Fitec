@@ -361,22 +361,20 @@
       <button class="btn-sm btn-accent" style="padding:10px 24px;font-size:14px;" onclick="saveTelefono()">Guardar teléfono</button>
     </div>
 
-    <!-- Cambiar contraseña -->
+    <!-- Hero principal -->
     <div class="home-form">
-      <h3>Cambiar contraseña</h3>
+      <h3>Hero principal</h3>
       <div class="form-group" style="margin-bottom:16px;">
-        <label>Contraseña actual</label>
-        <input type="password" id="pass-actual" placeholder="Contraseña actual">
+        <label>Foto del hero</label>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-sm btn-outline" type="button" onclick="document.getElementById('hero-image-input').click()">Seleccionar imagen</button>
+          <span id="hero-image-name" style="color:var(--muted);font-size:13px;">Ninguna imagen seleccionada</span>
+        </div>
+        <input type="file" id="hero-image-input" accept="image/*" style="display:none;" onchange="handleHeroImageSelect(event)">
       </div>
-      <div class="form-group" style="margin-bottom:16px;">
-        <label>Nueva contraseña</label>
-        <input type="password" id="pass-nueva" placeholder="Nueva contraseña">
+      <div id="hero-preview" style="margin-bottom:16px;max-width:100%;border:1px solid var(--border);border-radius:10px;overflow:hidden;min-height:120px;display:flex;align-items:center;justify-content:center;background:#f7f4ed;color:var(--muted);">
       </div>
-      <div class="form-group" style="margin-bottom:20px;">
-        <label>Repetir nueva contraseña</label>
-        <input type="password" id="pass-repetir" placeholder="Repetir nueva contraseña">
-      </div>
-      <button class="btn-sm btn-accent" style="padding:10px 24px;font-size:14px;" onclick="cambiarPassword()">Cambiar contraseña</button>
+      <button id="save-hero-btn" class="btn-sm btn-accent" style="padding:10px 24px;font-size:14px;" onclick="saveHeroImage()">Guardar hero</button>
     </div>
 
   </div>
