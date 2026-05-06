@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fitec</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ══════════════ NAVEGACIÓN ══════════════ -->
+  <nav>
+    <div class="nav-logo" onclick="goTo('index')">fitec</div>
+    <div class="nav-links">
+      <button id="nav-index"   onclick="goTo('index')">Inicio</button>
+      <button id="nav-cabinas" onclick="goTo('cabinas-list')">Cabinas</button>
+      <button id="nav-campers" onclick="goTo('campers-list')">Campers</button>
+    </div>
+  </nav>
+
+  <!-- ══════════════ INDEX ══════════════ -->
+  <div class="page active" id="page-index">
+    <div class="hero">
+      <div id="hero-bg" style="position:absolute;inset:0;opacity:.55;background:#1a1610;">
+        <!-- se rellena con la imagen hero si existe -->
+      </div>
+      <div class="hero-overlay"></div>
+      <div class="hero-text">
+        <h1>fitec</h1>
+        <p style="color: #c7bb17;">Cabinas & Campers a medida</p>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <div class="about-section">
+        <h2>¿Quiénes somos?</h2>
+        <p id="texto-quienes">Cargando...</p>
+      </div>
+      <div class="about-section">
+        <h2>¿Qué hacemos?</h2>
+        <p id="texto-que">Cargando...</p>
+      </div>
+      <div class="cat-grid">
+        <div class="cat-card" onclick="goTo('cabinas-list')">
+          <div class="cat-thumb" id="cat-thumb-cabinas">
+            <div class="ph-box"><span>Cabinas</span></div>
+          </div>
+          <div class="cat-label">
+            Cabinas
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="20" height="20">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/>
+            </svg>
+          </div>
+        </div>
+        <div class="cat-card" onclick="goTo('campers-list')">
+          <div class="cat-thumb" id="cat-thumb-campers">
+            <div class="ph-box"><span>Campers</span></div>
+          </div>
+          <div class="cat-label">
+            Campers
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="20" height="20">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>© 2025 <span>Fitec</span> — Todos los derechos reservados</footer>
+  </div>
+
+  <!-- ══════════════ CABINAS — GALERÍA ══════════════ -->
+  <div class="page" id="page-cabinas-list">
+    <div class="wrap">
+      <div class="page-header">
+        <button class="back-btn" onclick="goTo('index')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
+          </svg>
+          Volver
+        </button>
+        <h1 class="page-title">CABINAS</h1>
+      </div>
+      <div class="model-grid" id="cabinas-grid">
+        <div class="ph-box" style="grid-column:1/-1;padding:60px;text-align:center;">Cargando cabinas…</div>
+      </div>
+    </div>
+    <footer>© 2025 <span>Fitec</span> — Todos los derechos reservados</footer>
+  </div>
+
+  <!-- ══════════════ CAMPERS — GALERÍA ══════════════ -->
+  <div class="page" id="page-campers-list">
+    <div class="wrap">
+      <div class="page-header">
+        <button class="back-btn" onclick="goTo('index')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
+          </svg>
+          Volver
+        </button>
+        <h1 class="page-title">CAMPERS</h1>
+      </div>
+      <div class="model-grid" id="campers-grid">
+        <div class="ph-box" style="grid-column:1/-1;padding:60px;text-align:center;">Cargando campers…</div>
+      </div>
+    </div>
+    <footer>© 2025 <span>Fitec</span> — Todos los derechos reservados</footer>
+  </div>
+
+  <!-- ══════════════ DETALLE ══════════════ -->
+  <div class="page" id="page-detail">
+    <div class="wrap">
+      <div class="page-header">
+        <button class="back-btn" id="detail-back-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
+          </svg>
+          Volver
+        </button>
+      </div>
+      <div class="detail-layout">
+        <div class="detail-img-wrap">
+          <div id="detail-img" style="width:100%;aspect-ratio:4/3;border-radius:8px;overflow:hidden;background:#eee;">
+            <span id="detail-img-label">/img</span>
+          </div>
+        </div>
+        <div class="detail-info">
+          <p class="detail-category" id="detail-cat"></p>
+          <h2 class="detail-title" id="detail-title"></h2>
+          <div class="detail-divider"></div>
+          <p class="detail-desc" id="detail-desc"></p>
+          <p class="detail-desc" id="detail-desc2" style="margin-top:-12px;"></p>
+          <div class="detail-specs" id="detail-specs"></div>
+
+          <!-- Galería extra -->
+          <div id="detail-gallery" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px;"></div>
+
+          <button class="cta-btn" style="margin-top:24px;">Consultar</button>
+        </div>
+      </div>
+    </div>
+    <footer>© 2025 <span>Fitec</span> — Todos los derechos reservados</footer>
+  </div>
+
+  <script type="module" src="script.js"></script>
+
+</body>
+</html>
