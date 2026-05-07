@@ -284,7 +284,7 @@
     <div class="tabs">
       <button class="tab active" onclick="setTab('cabinas')">Cabinas</button>
       <button class="tab" onclick="setTab('campers')">Campers</button>
-      <button class="tab" onclick="setTab('home')">Textos</button>
+      <button class="tab" onclick="setTab('home')">Principal</button>
     </div>
 
     <!-- CABINAS -->
@@ -362,20 +362,19 @@
     </div>
 
     <!-- Hero principal -->
-    <div class="home-form">
-      <h3>Hero principal</h3>
-      <div class="form-group" style="margin-bottom:16px;">
-        <label>Foto del hero</label>
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-          <button class="btn-sm btn-outline" type="button" onclick="document.getElementById('hero-image-input').click()">Seleccionar imagen</button>
-          <span id="hero-image-name" style="color:var(--muted);font-size:13px;">Ninguna imagen seleccionada</span>
-        </div>
-        <input type="file" id="hero-image-input" accept="image/*" style="display:none;" onchange="handleHeroImageSelect(event)">
-      </div>
-      <div id="hero-preview" style="margin-bottom:16px;max-width:100%;border:1px solid var(--border);border-radius:10px;overflow:hidden;min-height:120px;display:flex;align-items:center;justify-content:center;background:#f7f4ed;color:var(--muted);">
-      </div>
-      <button id="save-hero-btn" class="btn-sm btn-accent" style="padding:10px 24px;font-size:14px;" onclick="saveHeroImage()">Guardar hero</button>
+    <div class="form-group" style="margin-bottom:20px;">
+      <label>Foto principal</label>
+    <div class="upload-zone" onclick="document.getElementById('hero-input').click()">
+      <input type="file" id="hero-input" accept="image/*" onchange="handleHeroSelect(event)">
+      <div class="upload-zone-icon">🖼️</div>
+      <p>Hacé clic para subir la foto de fondo</p>
+      <p style="font-size:11px;margin-top:4px;">JPG, PNG, WEBP — Se muestra detrás del título "fitec"</p>
     </div>
+    <div id="hero-preview" style="margin-top:12px;display:none;">
+      <img id="hero-preview-img" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">
+      <button class="btn-sm btn-danger" style="margin-top:8px;" onclick="removeHero()">Quitar foto</button>
+    </div>
+  </div>
 
   </div>
 </div>

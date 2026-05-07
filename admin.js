@@ -125,7 +125,13 @@ async function loadTextos() {
     currentHeroPath = data.hero_imagen || null;
     heroImageFile   = null;
     document.getElementById('hero-image-name').textContent = currentHeroPath ? 'Imagen actual cargada' : 'Ninguna imagen seleccionada';
-    renderHeroPreview(currentHeroPath ? imgUrl(currentHeroPath) : null);
+
+    if (data.hero_imagen) {
+      document.getElementById('hero-preview-img').src = imgUrl(data.hero_imagen);
+      document.getElementById('hero-preview').style.display = 'block';
+    } else {
+      renderHeroPreview(null);
+    }
   } else {
     currentHeroPath = null;
     heroImageFile   = null;
@@ -476,4 +482,48 @@ window.cambiarPassword = async function () {
   document.getElementById('pass-nueva').value   = '';
   document.getElementById('pass-repetir').value = '';
   toast('Contraseña cambiada y guardada', 'success');
+};
+window.handleHeroSelect = async function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Preview inmediato
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('hero-preview-img').src = ev.target.result;
+    document.getElementById('hero-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+
+  // Subir a Supabase
+  const ext  = file.name.split('.').pop();
+  const path = `hero/hero_${Date.now()}.${ext}`;
+
+  toast('Subiendo imagen…', '');
+
+  const { error } = await db.storage.from('fitec-images').upload(path, file, { upsert: true });
+  if (error) { toast('Error al subir la imagen', 'error'); return; }
+
+  // Guardar path en textos_home
+  const { error: dbError } = await db.from('textos_home').upsert({
+    id:           1,
+    hero_imagen:  path,
+  }, { onConflict: 'id' });
+
+  if (dbError) { toast('Error al guardar', 'error'); return; }
+  toast('Foto de fondo guardada', 'success');
+};
+
+window.removeHero = async function () {
+  const { error } = await db.from('textos_home').upsert({
+    id:          1,
+    hero_imagen: '',
+  }, { onConflict: 'id' });
+
+  if (error) { toast('Error al quitar la foto', 'error'); return; }
+
+  document.getElementById('hero-preview').style.display = 'none';
+  document.getElementById('hero-preview-img').src = '';
+  document.getElementById('hero-input').value = '';
+  toast('Foto de fondo quitada', 'success');
 };
