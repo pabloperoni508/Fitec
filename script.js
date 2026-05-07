@@ -51,6 +51,7 @@ function renderGrid(items, gridId, backPage) {
 
 function showDetail(item, backPage) {
   detailBackPage = backPage;
+  window._fitecItemActual = item;;
 
   document.getElementById('detail-cat').textContent   = item.categoria || '';
   document.getElementById('detail-title').textContent = item.nombre;
@@ -158,3 +159,15 @@ async function init() {
 }
 
 init();
+
+window.consultarWhatsapp = function () {
+  if (!window._fitecTelefono) {
+    alert('El número de contacto no está configurado aún.');
+    return;
+  }
+  const item = window._fitecItemActual;
+  const msg  = item
+    ? `Hola, me interesa el ${item.categoria} "${item.nombre}". ¿Podrían darme más información?`
+    : 'Hola, quisiera más información sobre sus productos.';
+  window.open(`https://wa.me/${window._fitecTelefono}?text=${encodeURIComponent(msg)}`, '_blank');
+};
