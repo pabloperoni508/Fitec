@@ -118,9 +118,10 @@ async function loadProductos(cat, gridId) {
 async function loadTextos() {
   const { data } = await db.from('textos_home').select('*').eq('id', 1).maybeSingle();
   if (data) {
-    document.getElementById('txt-quienes').value  = data.quienes_somos || '';
-    document.getElementById('txt-que').value      = data.que_hacemos   || '';
-    document.getElementById('txt-telefono').value = data.telefono      || '';
+    document.getElementById('txt-quienes').value   = data.quienes_somos || '';
+    document.getElementById('txt-que').value       = data.que_hacemos   || '';
+    document.getElementById('txt-telefono').value  = data.telefono      || '';
+    document.getElementById('txt-direccion').value = data.direccion     || '';
     if (data.admin_pass) ADMIN_PASS = data.admin_pass;
     currentHeroPath = data.hero_imagen || null;
     heroImageFile   = null;
@@ -526,4 +527,17 @@ window.removeHero = async function () {
   document.getElementById('hero-preview-img').src = '';
   document.getElementById('hero-input').value = '';
   toast('Foto de fondo quitada', 'success');
+};
+
+window.saveDireccion = async function () {
+  const direccion = document.getElementById('txt-direccion').value.trim();
+  if (!direccion) { toast('Ingresá una dirección', 'error'); return; }
+
+  const { error } = await db.from('textos_home').upsert({
+    id: 1,
+    direccion,
+  }, { onConflict: 'id' });
+
+  if (error) { toast('Error al guardar dirección', 'error'); return; }
+  toast('Dirección guardada', 'success');
 };
