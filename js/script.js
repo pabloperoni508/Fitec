@@ -1,8 +1,8 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 // ⚠️ Reemplazá estos valores con los de tu proyecto Supabase
-const SUPABASE_URL  = 'https://dvqwzttgskkorfhtdavu.supabase.co';
-const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2cXd6dHRnc2trb3JmaHRkYXZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTc1NTYsImV4cCI6MjA5MzU3MzU1Nn0.JaBMkSUiwms1oRtk9wsomB5XW3ssrQMplLaMf7K-OtE';
+const SUPABASE_URL = 'https://dvqwzttgskkorfhtdavu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2cXd6dHRnc2trb3JmaHRkYXZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTc1NTYsImV4cCI6MjA5MzU3MzU1Nn0.JaBMkSUiwms1oRtk9wsomB5XW3ssrQMplLaMf7K-OtE';
 
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -11,8 +11,23 @@ function imgUrl(path) {
   return `${SUPABASE_URL}/storage/v1/object/public/fitec-images/${path}`;
 }
 
+function buildMapEmbedUrl(mapsLink) {
+  if (!mapsLink) return null;
+
+  // Caso 1: el link tiene coordenadas (formato @lat,lng)
+  const coordMatch = mapsLink.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (coordMatch) {
+    const [, lat, lng] = coordMatch;
+    return `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
+  }
+
+  // Caso 2: link corto o dirección de texto
+  return `https://maps.google.com/maps?q=${encodeURIComponent(mapsLink)}&z=15&output=embed`;
+}
+
 let detailBackPage = 'index';
 
+// ── NAVEGACIÓN ────────────────────────────────────────────────
 window.goTo = function (pageId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const target = document.getElementById('page-' + pageId);
@@ -26,6 +41,7 @@ window.goTo = function (pageId) {
   if (btn) btn.classList.add('active');
 };
 
+// ── GRILLAS ───────────────────────────────────────────────────
 function renderGrid(items, gridId, backPage) {
   const grid = document.getElementById(gridId);
   if (!grid) return;
@@ -49,9 +65,10 @@ function renderGrid(items, gridId, backPage) {
   });
 }
 
+// ── DETALLE ───────────────────────────────────────────────────
 function showDetail(item, backPage) {
   detailBackPage = backPage;
-  window._fitecItemActual = item;;
+  window._fitecItemActual = item;
 
   document.getElementById('detail-cat').textContent   = item.categoria || '';
   document.getElementById('detail-title').textContent = item.nombre;
@@ -92,16 +109,10 @@ function showDetail(item, backPage) {
 
   document.getElementById('detail-back-btn').onclick = () => goTo(detailBackPage);
 
-  // Actualizar link de WhatsApp con el modelo en el mensaje
-  const waLink = document.getElementById('whatsapp-link');
-  if (waLink && window._fitecTelefono) {
-    const msg = encodeURIComponent(`Hola, me interesa el ${item.categoria} "${item.nombre}". ¿Podrían darme más información?`);
-    waLink.href = `https://wa.me/${window._fitecTelefono}?text=${msg}`;
-  }
-
   goTo('detail');
 }
 
+// ── INIT ──────────────────────────────────────────────────────
 async function init() {
   const { data: textos, error: texError } = await db
     .from('textos_home')
@@ -114,6 +125,22 @@ async function init() {
     document.getElementById('texto-que').textContent     = textos.que_hacemos   || '';
     window._fitecTelefono = textos.telefono || '';
 
+    // Dirección y teléfono visibles en la home
+    const contactoSection = document.getElementById('contacto-section');
+    let mostrarContacto = false;
+
+    if (textos.direccion) {
+      document.getElementById('texto-direccion').textContent = `📍 ${textos.direccion}`;
+      mostrarContacto = true;
+    }
+    if (textos.telefono) {
+      document.getElementById('texto-telefono').textContent = `📞 ${textos.telefono}`;
+      mostrarContacto = true;
+    }
+    if (contactoSection) {
+      contactoSection.style.display = mostrarContacto ? 'block' : 'none';
+    }
+
     // Foto hero
     if (textos.hero_imagen) {
       const heroBg = document.getElementById('hero-bg');
@@ -121,12 +148,33 @@ async function init() {
       heroBg.style.opacity = '1';
       heroBg.style.background = 'none';
     }
+
+    // Mapa de ubicación
+    const mapaSection = document.getElementById('mapa-section');
+    if (mapaSection) {
+      if (textos.maps_link) {
+        const embedUrl = buildMapEmbedUrl(textos.maps_link);
+        document.getElementById('mapa-contenedor').innerHTML = `
+          <iframe
+            src="${embedUrl}"
+            width="100%" height="320" style="border:0;"
+            allowfullscreen loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        `;
+        mapaSection.style.display = 'block';
+      } else {
+        mapaSection.style.display = 'none';
+      }
+    }
+
   } else {
     document.getElementById('texto-quienes').textContent = '';
     document.getElementById('texto-que').textContent     = '';
     if (texError) console.warn('textos_home:', texError.message);
   }
 
+  // Cabinas
   const { data: cabinas } = await db
     .from('productos')
     .select('*')
@@ -141,6 +189,7 @@ async function init() {
       `<img src="${imgUrl(cabinas[0].imagen_principal)}" style="width:100%;height:100%;object-fit:cover;">`;
   }
 
+  // Campers
   const { data: campers } = await db
     .from('productos')
     .select('*')
@@ -160,13 +209,14 @@ async function init() {
 
 init();
 
+// ── WHATSAPP ──────────────────────────────────────────────────
 window.consultarWhatsapp = function () {
   if (!window._fitecTelefono) {
     alert('El número de contacto no está configurado aún.');
     return;
   }
   const item = window._fitecItemActual;
-  const msg  = item
+  const msg = item
     ? `Hola, me interesa el ${item.categoria} "${item.nombre}". ¿Podrían darme más información?`
     : 'Hola, quisiera más información sobre sus productos.';
   window.open(`https://wa.me/${window._fitecTelefono}?text=${encodeURIComponent(msg)}`, '_blank');

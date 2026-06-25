@@ -43,6 +43,14 @@
         <h2>¿Qué hacemos?</h2>
         <p id="texto-que">Cargando...</p>
       </div>
+      <div class="about-section" id="contacto-section" style="display:none;">
+        <p id="texto-direccion" style="font-size:16px;color:var(--ink);"></p>
+        <p id="texto-telefono" style="font-size:16px;color:var(--ink);margin-top:6px;"></p>
+      </div>
+      <div class="about-section" id="mapa-section" style="display:none;">
+        <h2>¿Dónde estamos?</h2>
+        <div id="mapa-contenedor" style="width:100%;border-radius:12px;overflow:hidden;margin-top:12px;"></div>
+      </div>
       <div class="cat-grid">
         <div class="cat-card" onclick="goTo('cabinas-list')">
           <div class="cat-thumb" id="cat-thumb-cabinas">
@@ -138,11 +146,9 @@
           <!-- Galería extra -->
           <div id="detail-gallery" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px;"></div>
 
-          <a id="whatsapp-link" href="#" target="_blank" style="margin-top:24px;display:block;">
-            <button class="cta-btn" id="whatsapp-btn" style="margin-top:24px;width:100%;" onclick="consultarWhatsapp()">
-              Consultar por WhatsApp
-            </button>
-          </a>
+          <button class="cta-btn" id="whatsapp-btn" style="margin-top:24px;width:100%;" onclick="consultarWhatsapp()">
+            Consultar por WhatsApp
+          </button>
         </div>
       </div>
     </div>

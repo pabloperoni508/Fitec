@@ -122,6 +122,7 @@ async function loadTextos() {
     document.getElementById('txt-que').value       = data.que_hacemos   || '';
     document.getElementById('txt-telefono').value  = data.telefono      || '';
     document.getElementById('txt-direccion').value = data.direccion     || '';
+    document.getElementById('txt-maps').value      = data.maps_link     || '';
     if (data.admin_pass) ADMIN_PASS = data.admin_pass;
     currentHeroPath = data.hero_imagen || null;
     heroImageFile   = null;
@@ -540,4 +541,17 @@ window.saveDireccion = async function () {
 
   if (error) { toast('Error al guardar dirección', 'error'); return; }
   toast('Dirección guardada', 'success');
+};
+
+window.saveMapsLink = async function () {
+  const link = document.getElementById('txt-maps').value.trim();
+  if (!link) { toast('Pegá un link de Google Maps', 'error'); return; }
+
+  const { error } = await db.from('textos_home').upsert({
+    id: 1,
+    maps_link: link,
+  }, { onConflict: 'id' });
+
+  if (error) { toast('Error al guardar ubicación', 'error'); return; }
+  toast('Ubicación guardada', 'success');
 };
