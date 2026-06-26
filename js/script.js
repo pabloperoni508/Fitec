@@ -114,6 +114,9 @@ function showDetail(item, backPage) {
 
 // ── INIT ──────────────────────────────────────────────────────
 async function init() {
+    document.querySelectorAll('footer').forEach(footer => {
+    footer.innerHTML = footer.innerHTML.replace('2025', new Date().getFullYear());
+      });
   const { data: textos, error: texError } = await db
     .from('textos_home')
     .select('*')
