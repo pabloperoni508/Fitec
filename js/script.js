@@ -125,20 +125,15 @@ async function init() {
     document.getElementById('texto-que').textContent     = textos.que_hacemos   || '';
     window._fitecTelefono = textos.telefono || '';
 
-    // Dirección y teléfono visibles en la home
+    // Teléfono y contacto
     const contactoSection = document.getElementById('contacto-section');
-    let mostrarContacto = false;
-
-    if (textos.direccion) {
-      document.getElementById('texto-direccion').textContent = `📍 ${textos.direccion}`;
-      mostrarContacto = true;
-    }
     if (textos.telefono) {
       document.getElementById('texto-telefono').textContent = `📞 ${textos.telefono}`;
-      mostrarContacto = true;
-    }
-    if (contactoSection) {
-      contactoSection.style.display = mostrarContacto ? 'block' : 'none';
+      if (contactoSection) {
+        contactoSection.style.display = 'block';
+      }
+    } else if (contactoSection) {
+      contactoSection.style.display = 'none';
     }
 
     // Foto hero
