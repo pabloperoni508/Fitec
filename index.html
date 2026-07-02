@@ -10,17 +10,12 @@
   <link rel="stylesheet" href="css/admin.css">
   <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
-<<<<<<< HEAD
   <link rel="apple-touch-icon" sizes="180x180" href="img/favicon-180x180.png">
-=======
-  <link rel="apple-touch-icon" sizes="192x192" href="img/favicon-192x192.png">
->>>>>>> 93f2aaf137df3b5a5b4f310f88ba73c8cb9d20ca
 </head>
 <body>
 
   <!-- ══════════════ NAVEGACIÓN ══════════════ -->
   <nav>
-<<<<<<< HEAD
     <div class="nav-logo" onclick="goTo('index')">
       <img src="img/fitec-logo.png" alt="Fitec" style="height:40px;object-fit:contain;">
     </div>
@@ -29,25 +24,19 @@
       <!-- categorías se insertan acá dinámicamente -->
     </div>
   </nav>
-=======
-  <div class="nav-logo" onclick="goTo('index')">fitec</div>
-  <div class="nav-links" id="nav-links">
-    <button id="nav-index" onclick="goTo('index')">Inicio</button>
-    <!-- las categorías se insertan acá dinámicamente -->
-  </div>
-</nav>
->>>>>>> 93f2aaf137df3b5a5b4f310f88ba73c8cb9d20ca
 
-<!-- INDEX -->
-<div class="page active" id="page-index">
-  <div class="hero">
-    <div id="hero-bg" style="position:absolute;inset:0;opacity:.55;background:#1a1610;"></div>
-    <div class="hero-overlay"></div>
-    <div class="hero-text">
-      <h1>fitec</h1>
-      <p style="color: #c7bb17;">Cabinas & Campers a medida</p>
+  <!-- ══════════════ INDEX ══════════════ -->
+  <div class="page active" id="page-index">
+    <div class="hero">
+      <div id="hero-bg" style="position:absolute;inset:0;opacity:.55;background:#1a1610;">
+        <!-- se rellena con la imagen hero si existe -->
+      </div>
+      <div class="hero-overlay"></div>
+      <div class="hero-text">
+        <h1>fitec</h1>
+        <p style="color: #c7bb17;">Cabinas & Campers a medida</p>
+      </div>
     </div>
-<<<<<<< HEAD
 
     <div class="wrap">
       <div class="about-section">
@@ -79,116 +68,6 @@
 
   <!-- páginas de categoría se insertan dinámicamente -->
   <div id="categoria-pages"></div>
-=======
-  </div>
-
-  <div class="wrap">
-    <div class="about-section">
-      <h2>¿Quiénes somos?</h2>
-      <p id="texto-quienes">Cargando...</p>
-    </div>
-    <div class="about-section">
-      <h2>¿Qué hacemos?</h2>
-      <p id="texto-que">Cargando...</p>
-    </div>
-    <div class="about-section" id="contacto-section" style="display:none;">
-      <p id="texto-telefono" style="font-size:16px;color:var(--ink);"></p>
-    </div>
-
-    <!-- cat-grid se genera dinámicamente -->
-    <div class="cat-grid" id="cat-grid"></div>
-
-    <!-- Mapa -->
-    <div id="mapa-section" style="display:none;margin-top:48px;">
-      <h2>¿Dónde estamos?</h2>
-      <div id="mapa-contenedor" style="width:100%;border-radius:12px;overflow:hidden;margin-top:12px;"></div>
-    </div>
-
-  </div><!-- cierra .wrap -->
-
-  
-
-</div><!-- cierra page-index -->
-
-<!-- páginas de categoría se insertan dinámicamente -->
-<div id="categoria-pages"></div>
-
-<!-- DETALLE -->
-<div class="page" id="page-detail">
-  <div class="wrap">
-    <div class="page-header">
-      <button class="back-btn" id="detail-back-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
-        </svg>
-        Volver
-      </button>
-    </div>
-    <div class="detail-layout">
-      <div class="detail-img-wrap">
-        <div id="detail-img" style="width:100%;aspect-ratio:4/3;border-radius:8px;overflow:hidden;background:#eee;"></div>
-      </div>
-      <div class="detail-info">
-        <p class="detail-category" id="detail-cat"></p>
-        <h2 class="detail-title" id="detail-title"></h2>
-        <div class="detail-divider"></div>
-        <p class="detail-desc" id="detail-desc"></p>
-        <p class="detail-desc" id="detail-desc2" style="margin-top:-12px;"></p>
-        <div class="detail-specs" id="detail-specs"></div>
-        <div id="detail-gallery" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px;"></div>
-        <button class="cta-btn" id="whatsapp-btn" style="margin-top:24px;width:100%;" onclick="consultarWhatsapp()">
-          Consultar por WhatsApp
-        </button>
-      </div>
-    </div>
-  </div>
-  
-</div>
-
-<div id="mapa-section" class="about-section" style="display:none;max-width:900px;margin:0 auto;padding:0 24px 48px;">
-  <h2>¿Dónde estamos?</h2>
-  <div id="mapa-contenedor" style="width:100%;border-radius:12px;overflow:hidden;margin-top:12px;"></div>
-</div>
-  <div>
-    <footer>© <span class="year"></span> <span>Fitec</span> — Todos los derechos reservados | desarrollado por <b>Peroni Pablo</b> — Contacto: 3471670049 — Gmail: pabloperoni508@gmail.com</footer>
-  </div>
-  <!-- ══════════════ CABINAS — GALERÍA ══════════════ -->
-  <div class="page" id="page-cabinas-list">
-    <div class="wrap">
-      <div class="page-header">
-        <button class="back-btn" onclick="goTo('index')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
-          </svg>
-          Volver
-        </button>
-        <h1 class="page-title">CABINAS</h1>
-      </div>
-      <div class="model-grid" id="cabinas-grid">
-        <div class="ph-box" style="grid-column:1/-1;padding:60px;text-align:center;">Cargando cabinas…</div>
-      </div>
-    </div>
-    
-
-  <!-- ══════════════ CAMPERS — GALERÍA ══════════════ -->
-  <div class="page" id="page-campers-list">
-    <div class="wrap">
-      <div class="page-header">
-        <button class="back-btn" onclick="goTo('index')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
-          </svg>
-          Volver
-        </button>
-        <h1 class="page-title">CAMPERS</h1>
-      </div>
-      <div class="model-grid" id="campers-grid">
-        <div class="ph-box" style="grid-column:1/-1;padding:60px;text-align:center;">Cargando campers…</div>
-      </div>
-    </div>
-    
-  </div>
->>>>>>> 93f2aaf137df3b5a5b4f310f88ba73c8cb9d20ca
 
   <!-- ══════════════ DETALLE ══════════════ -->
   <div class="page" id="page-detail">
@@ -219,11 +98,7 @@
         </div>
       </div>
     </div>
-<<<<<<< HEAD
     <footer>© <span class="year"></span> <span>Fitec</span> — Todos los derechos reservados | desarrollado por <b>Peroni Pablo</b> — Contacto: 3471670049 — Gmail: pabloperoni508@gmail.com</footer>
-=======
-    
->>>>>>> 93f2aaf137df3b5a5b4f310f88ba73c8cb9d20ca
   </div>
 
   <script type="module" src="js/script.js"></script>
