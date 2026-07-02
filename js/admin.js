@@ -18,6 +18,7 @@ function imgUrl(path) {
 }
 
 let currentCategoria = 'cabina';
+let categoriasCache  = [];
 let editingId        = null;
 let pendingFiles     = [];
 let existingImages   = [];
@@ -52,10 +53,10 @@ window.doLogout = function () {
 };
 
 window.setTab = function (tab) {
-  const names = ['cabinas', 'campers', 'home'];
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', names[i] === tab);
-  });
+  document.querySelectorAll('#admin-tabs .tab').forEach(t => t.classList.remove('active'));
+  const tabIndex = ['categorias-productos', 'categorias-mgr', 'home'];
+  const idx = tabIndex.indexOf(tab);
+  if (idx >= 0) document.querySelectorAll('#admin-tabs .tab')[idx].classList.add('active');
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
 };
@@ -68,22 +69,117 @@ function toast(msg, type = '') {
 }
 
 async function loadAll() {
-  await loadProductos('cabina', 'grid-cabinas');
-  await loadProductos('camper', 'grid-campers');
+  await loadCategorias();
   await loadTextos();
 }
 
-async function loadProductos(cat, gridId) {
+async function loadCategorias() {
   const { data, error } = await db
-    .from('productos')
-    .select('*')
-    .eq('categoria', cat)
+    .from('categorias').select('*').order('orden', { ascending: true });
+
+  categoriasCache = data || [];
+
+  // Renderizar grilla de gestión
+  const grid = document.getElementById('grid-categorias');
+  if (!data || data.length === 0) {
+    grid.innerHTML = `<p style="color:var(--muted);padding:40px 0;">Sin categorías. ¡Agregá la primera!</p>`;
+  } else {
+    grid.innerHTML = '';
+    data.forEach(cat => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <div class="product-card-body" style="padding:20px;">
+          <div class="product-card-name">
+            ${cat.nombre}
+            ${!cat.activo ? '<span class="inactive-badge">oculta</span>' : ''}
+          </div>
+          <div class="product-card-cat">slug: ${cat.slug} · orden ${cat.orden}</div>
+          <div class="product-card-actions" style="margin-top:12px;">
+            <button class="btn-sm btn-outline" style="color:var(--ink);border-color:var(--border);"
+              onclick="editCat('${cat.id}')">✏️ Editar</button>
+            <button class="btn-sm btn-danger"
+              onclick="deleteCat('${cat.id}', '${cat.nombre}')">🗑️ Borrar</button>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // Construir tabs y secciones dinámicas de productos
+  buildProductTabs(data || []);
+
+  // Actualizar selector de categoría en el modal de producto
+  const select = document.getElementById('f-categoria');
+  if (select) {
+    select.innerHTML = (data || []).map(c =>
+      `<option value="${c.slug}">${c.nombre}</option>`
+    ).join('');
+  }
+
+  // Cargar productos de cada categoría
+  for (const cat of (data || [])) {
+    await loadProductosByCat(cat);
+  }
+}
+
+function buildProductTabs(categorias) {
+  const tabsEl     = document.getElementById('producto-tabs');
+  const sectionsEl = document.getElementById('producto-sections');
+  tabsEl.innerHTML    = '';
+  sectionsEl.innerHTML = '';
+
+  categorias.forEach((cat, i) => {
+    const btn = document.createElement('button');
+    btn.className = `tab ${i === 0 ? 'active' : ''}`;
+    btn.textContent = cat.nombre;
+    btn.onclick = () => {
+      tabsEl.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      sectionsEl.querySelectorAll('.prod-section').forEach(s => s.classList.remove('active'));
+      document.getElementById(`prod-section-${cat.slug}`).classList.add('active');
+      currentCategoria = cat.slug;
+    };
+    tabsEl.appendChild(btn);
+
+    const sec = document.createElement('div');
+    sec.className = `prod-section ${i === 0 ? 'active' : ''}`;
+    sec.id        = `prod-section-${cat.slug}`;
+    sec.innerHTML = `
+      <div class="section-header">
+        <h2 class="section-title">${cat.nombre.toUpperCase()}</h2>
+        <button class="btn-sm btn-accent" onclick="openModal('${cat.slug}')">+ Nuevo modelo</button>
+      </div>
+      <div class="products-grid" id="grid-${cat.slug}">
+        <p style="color:var(--muted);">Cargando…</p>
+      </div>
+    `;
+    sectionsEl.appendChild(sec);
+  });
+
+  // CSS para prod-section
+  if (!document.getElementById('prod-section-style')) {
+    const style = document.createElement('style');
+    style.id = 'prod-section-style';
+    style.textContent = `.prod-section { display:none; } .prod-section.active { display:block; }`;
+    document.head.appendChild(style);
+  }
+
+  if (categorias.length > 0) currentCategoria = categorias[0].slug;
+}
+
+async function loadProductosByCat(cat) {
+  const { data, error } = await db
+    .from('productos').select('*')
+    .eq('categoria', cat.slug)
     .order('orden', { ascending: true });
 
-  const grid = document.getElementById(gridId);
+  const grid = document.getElementById(`grid-${cat.slug}`);
+  if (!grid) return;
   if (error) { grid.innerHTML = `<p style="color:var(--danger);">Error al cargar</p>`; return; }
   if (!data || data.length === 0) {
-    grid.innerHTML = `<p style="color:var(--muted);padding:40px 0;">Sin modelos aún. ¡Agregá el primero!</p>`;
+    grid.innerHTML = `<p style="color:var(--muted);padding:40px 0;">Sin modelos aún.</p>`;
     return;
   }
 
@@ -121,13 +217,14 @@ async function loadTextos() {
     document.getElementById('txt-quienes').value   = data.quienes_somos || '';
     document.getElementById('txt-que').value       = data.que_hacemos   || '';
     document.getElementById('txt-telefono').value  = data.telefono      || '';
-    document.getElementById('txt-direccion').value = data.direccion     || '';
+    const elDir = document.getElementById('txt-direccion');
+    if (elDir) elDir.value = data.direccion || '';
     document.getElementById('txt-maps').value      = data.maps_link     || '';
     if (data.admin_pass) ADMIN_PASS = data.admin_pass;
     currentHeroPath = data.hero_imagen || null;
     heroImageFile   = null;
-    document.getElementById('hero-image-name').textContent = currentHeroPath ? 'Imagen actual cargada' : 'Ninguna imagen seleccionada';
-
+    const elHeroName = document.getElementById('hero-image-name');
+    if (elHeroName) elHeroName.textContent = currentHeroPath ? 'Imagen actual cargada' : 'Ninguna imagen seleccionada';
     if (data.hero_imagen) {
       document.getElementById('hero-preview-img').src = imgUrl(data.hero_imagen);
       document.getElementById('hero-preview').style.display = 'block';
@@ -137,7 +234,8 @@ async function loadTextos() {
   } else {
     currentHeroPath = null;
     heroImageFile   = null;
-    document.getElementById('hero-image-name').textContent = 'Ninguna imagen seleccionada';
+    const elHeroName = document.getElementById('hero-image-name');
+    if (elHeroName) elHeroName.textContent = 'Ninguna imagen seleccionada';
     renderHeroPreview(null);
   }
 }
@@ -213,12 +311,13 @@ window.openModal = function (cat) {
   existingImages   = [];
   removedImages    = [];
 
-  document.getElementById('modal-title').textContent = cat === 'cabina' ? 'Nueva cabina' : 'Nuevo camper';
+  document.getElementById('modal-title').textContent = 'Nuevo modelo';
   document.getElementById('f-nombre').value          = '';
   document.getElementById('f-orden').value           = '1';
   document.getElementById('f-desc').value            = '';
   document.getElementById('f-desc2').value           = '';
   document.getElementById('f-activo').checked        = true;
+  document.getElementById('f-categoria').value       = cat;
   document.getElementById('specs-builder').innerHTML = '';
   document.getElementById('img-preview').innerHTML   = '';
   addSpecRow();
@@ -246,6 +345,7 @@ window.editProducto = async function (id) {
   document.getElementById('f-desc').value            = item.descripcion  || '';
   document.getElementById('f-desc2').value           = item.descripcion2 || '';
   document.getElementById('f-activo').checked        = item.activo;
+  document.getElementById('f-categoria').value       = item.categoria;
 
   document.getElementById('specs-builder').innerHTML = '';
   if (item.specs && typeof item.specs === 'object') {
@@ -390,7 +490,7 @@ window.saveProducto = async function () {
 
     const payload = {
       nombre,
-      categoria:        currentCategoria,
+      categoria:        document.getElementById('f-categoria').value,
       orden:            parseInt(document.getElementById('f-orden').value) || 1,
       descripcion:      document.getElementById('f-desc').value.trim(),
       descripcion2:     document.getElementById('f-desc2').value.trim(),
@@ -554,4 +654,73 @@ window.saveMapsLink = async function () {
 
   if (error) { toast('Error al guardar ubicación', 'error'); return; }
   toast('Ubicación guardada', 'success');
+};
+// ── CATEGORÍAS ────────────────────────────────────────────────
+let editingCatId = null;
+
+window.openCatModal = function () {
+  editingCatId = null;
+  document.getElementById('cat-modal-title').textContent = 'Nueva categoría';
+  document.getElementById('cat-nombre').value  = '';
+  document.getElementById('cat-slug').value    = '';
+  document.getElementById('cat-orden').value   = '1';
+  document.getElementById('cat-activo').checked = true;
+  document.getElementById('cat-modal').classList.add('open');
+};
+
+window.closeCatModal = function () {
+  document.getElementById('cat-modal').classList.remove('open');
+};
+
+window.editCat = async function (id) {
+  const { data } = await db.from('categorias').select('*').eq('id', id).single();
+  if (!data) return;
+  editingCatId = id;
+  document.getElementById('cat-modal-title').textContent = `Editar: ${data.nombre}`;
+  document.getElementById('cat-nombre').value   = data.nombre;
+  document.getElementById('cat-slug').value     = data.slug;
+  document.getElementById('cat-orden').value    = data.orden;
+  document.getElementById('cat-activo').checked = data.activo;
+  document.getElementById('cat-modal').classList.add('open');
+};
+
+window.saveCat = async function () {
+  const nombre = document.getElementById('cat-nombre').value.trim();
+  const slug   = document.getElementById('cat-slug').value.trim().toLowerCase().replace(/\s+/g, '-');
+  if (!nombre || !slug) { toast('Nombre y slug son obligatorios', 'error'); return; }
+
+  const btn = document.getElementById('cat-save-btn');
+  btn.innerHTML = '<span class="spinner"></span> Guardando…';
+  btn.disabled  = true;
+
+  const payload = {
+    nombre,
+    slug,
+    orden:  parseInt(document.getElementById('cat-orden').value) || 1,
+    activo: document.getElementById('cat-activo').checked,
+  };
+
+  let error;
+  if (editingCatId) {
+    ({ error } = await db.from('categorias').update(payload).eq('id', editingCatId));
+  } else {
+    ({ error } = await db.from('categorias').insert(payload));
+  }
+
+  btn.innerHTML = 'Guardar';
+  btn.disabled  = false;
+
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+
+  closeCatModal();
+  toast('Categoría guardada', 'success');
+  loadCategorias();
+};
+
+window.deleteCat = async function (id, nombre) {
+  if (!confirm(`¿Borrar la categoría "${nombre}"?\nTodos los productos de esta categoría quedarán sin categoría asignada.`)) return;
+  const { error } = await db.from('categorias').delete().eq('id', id);
+  if (error) { toast('Error al borrar', 'error'); return; }
+  toast('Categoría eliminada', '');
+  loadCategorias();
 };

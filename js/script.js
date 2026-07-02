@@ -1,6 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-// ⚠️ Reemplazá estos valores con los de tu proyecto Supabase
 const SUPABASE_URL = 'https://dvqwzttgskkorfhtdavu.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2cXd6dHRnc2trb3JmaHRkYXZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTc1NTYsImV4cCI6MjA5MzU3MzU1Nn0.JaBMkSUiwms1oRtk9wsomB5XW3ssrQMplLaMf7K-OtE';
 
@@ -13,15 +12,11 @@ function imgUrl(path) {
 
 function buildMapEmbedUrl(mapsLink) {
   if (!mapsLink) return null;
-
-  // Caso 1: el link tiene coordenadas (formato @lat,lng)
   const coordMatch = mapsLink.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
   if (coordMatch) {
     const [, lat, lng] = coordMatch;
     return `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
   }
-
-  // Caso 2: link corto o dirección de texto
   return `https://maps.google.com/maps?q=${encodeURIComponent(mapsLink)}&z=15&output=embed`;
 }
 
@@ -36,8 +31,10 @@ window.goTo = function (pageId) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
-  const base = pageId.split('-')[0];
-  const btn = document.getElementById('nav-' + base);
+  const slug = pageId.replace('-list', '');
+  const btn = document.getElementById('nav-' + pageId)
+           || document.getElementById('nav-' + slug)
+           || document.getElementById('nav-index');
   if (btn) btn.classList.add('active');
 };
 
@@ -76,11 +73,9 @@ function showDetail(item, backPage) {
   document.getElementById('detail-desc2').textContent = item.descripcion2 || '';
 
   const detailImg = document.getElementById('detail-img');
-  if (item.imagen_principal) {
-    detailImg.innerHTML = `<img src="${imgUrl(item.imagen_principal)}" alt="${item.nombre}" style="width:100%;height:100%;object-fit:cover;">`;
-  } else {
-    detailImg.innerHTML = `<div class="ph-box" style="height:100%;"><span>/img ${item.nombre}</span></div>`;
-  }
+  detailImg.innerHTML = item.imagen_principal
+    ? `<img src="${imgUrl(item.imagen_principal)}" alt="${item.nombre}" style="width:100%;height:100%;object-fit:cover;">`
+    : `<div class="ph-box" style="height:100%;"><span>/img ${item.nombre}</span></div>`;
 
   const specsEl = document.getElementById('detail-specs');
   specsEl.innerHTML = '';
@@ -108,98 +103,143 @@ function showDetail(item, backPage) {
   }
 
   document.getElementById('detail-back-btn').onclick = () => goTo(detailBackPage);
-
   goTo('detail');
+}
+
+// ── GENERAR PÁGINAS Y NAV POR CATEGORÍA ──────────────────────
+function buildCategoriaPages(categorias) {
+  const navLinks    = document.getElementById('nav-links');
+  const catGrid     = document.getElementById('cat-grid');
+  const pagesWrap   = document.getElementById('categoria-pages');
+
+  // Limpiar los dinámicos (dejar solo el botón Inicio)
+  navLinks.querySelectorAll('.nav-cat').forEach(el => el.remove());
+  catGrid.innerHTML   = '';
+  pagesWrap.innerHTML = '';
+
+  categorias.forEach(cat => {
+    const slug = cat.slug;
+
+    // Botón en el nav
+    const navBtn = document.createElement('button');
+    navBtn.id        = `nav-${slug}`;
+    navBtn.className = 'nav-cat';
+    navBtn.textContent = cat.nombre;
+    navBtn.onclick = () => goTo(`${slug}-list`);
+    navLinks.appendChild(navBtn);
+
+    // Tarjeta en la home
+    catGrid.innerHTML += `
+      <div class="cat-card" onclick="goTo('${slug}-list')">
+        <div class="cat-thumb" id="cat-thumb-${slug}">
+          <div class="ph-box"><span>${cat.nombre}</span></div>
+        </div>
+        <div class="cat-label">
+          ${cat.nombre}
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="20" height="20">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/>
+          </svg>
+        </div>
+      </div>
+    `;
+
+    // Página de lista de la categoría
+    pagesWrap.innerHTML += `
+      <div class="page" id="page-${slug}-list">
+        <div class="wrap">
+          <div class="page-header">
+            <button class="back-btn" onclick="goTo('index')">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
+              </svg>
+              Volver
+            </button>
+            <h1 class="page-title">${cat.nombre.toUpperCase()}</h1>
+          </div>
+          <div class="model-grid" id="${slug}-grid">
+            <div class="ph-box" style="grid-column:1/-1;padding:60px;text-align:center;">Cargando…</div>
+          </div>
+        </div>
+        <footer>© <span class="year"></span> <span>Fitec</span> — Todos los derechos reservados | desarrollado por <b>Peroni Pablo</b> — Contacto: 3471670049 — Gmail: pabloperoni508@gmail.com</footer>
+      </div>
+    `;
+  });
+
+  // Actualizar año en todos los footers
+  document.querySelectorAll('.year').forEach(el => el.textContent = new Date().getFullYear());
 }
 
 // ── INIT ──────────────────────────────────────────────────────
 async function init() {
-    document.querySelectorAll('footer').forEach(footer => {
-    footer.innerHTML = footer.innerHTML.replace('2025', new Date().getFullYear());
-      });
+  // Año en footers
+  document.querySelectorAll('.year').forEach(el => el.textContent = new Date().getFullYear());
+
+  // Textos home
   const { data: textos, error: texError } = await db
-    .from('textos_home')
-    .select('*')
-    .eq('id', 1)
-    .maybeSingle();
+    .from('textos_home').select('*').eq('id', 1).maybeSingle();
 
   if (textos) {
-    document.getElementById('texto-quienes').textContent = textos.quienes_somos || '';
-    document.getElementById('texto-que').textContent     = textos.que_hacemos   || '';
+    const elQ = document.getElementById('texto-quienes');
+    const elH = document.getElementById('texto-que');
+    if (elQ) elQ.textContent = textos.quienes_somos || '';
+    if (elH) elH.textContent = textos.que_hacemos   || '';
     window._fitecTelefono = textos.telefono || '';
 
-    // Teléfono y contacto
+    const elTel = document.getElementById('texto-telefono');
     const contactoSection = document.getElementById('contacto-section');
-    if (textos.telefono) {
-      document.getElementById('texto-telefono').textContent = `📞 ${textos.telefono}`;
-      if (contactoSection) {
-        contactoSection.style.display = 'block';
-      }
-    } else if (contactoSection) {
-      contactoSection.style.display = 'none';
+    if (elTel && textos.telefono) {
+      elTel.textContent = `📞 ${textos.telefono}`;
+      if (contactoSection) contactoSection.style.display = 'block';
     }
 
-    // Foto hero
     if (textos.hero_imagen) {
       const heroBg = document.getElementById('hero-bg');
-      heroBg.innerHTML = `<img src="${imgUrl(textos.hero_imagen)}" style="width:100%;height:100%;object-fit:cover;">`;
-      heroBg.style.opacity = '1';
-      heroBg.style.background = 'none';
-    }
-
-    // Mapa de ubicación
-    const mapaSection = document.getElementById('mapa-section');
-    if (mapaSection) {
-      if (textos.maps_link) {
-        const embedUrl = buildMapEmbedUrl(textos.maps_link);
-        document.getElementById('mapa-contenedor').innerHTML = `
-          <iframe
-            src="${embedUrl}"
-            width="100%" height="320" style="border:0;"
-            allowfullscreen loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade">
-          </iframe>
-        `;
-        mapaSection.style.display = 'block';
-      } else {
-        mapaSection.style.display = 'none';
+      if (heroBg) {
+        heroBg.innerHTML = `<img src="${imgUrl(textos.hero_imagen)}" style="width:100%;height:100%;object-fit:cover;">`;
+        heroBg.style.opacity   = '1';
+        heroBg.style.background = 'none';
       }
     }
 
-  } else {
-    document.getElementById('texto-quienes').textContent = '';
-    document.getElementById('texto-que').textContent     = '';
-    if (texError) console.warn('textos_home:', texError.message);
+    const mapaSection = document.getElementById('mapa-section');
+    if (mapaSection && textos.maps_link) {
+      document.getElementById('mapa-contenedor').innerHTML = `
+        <iframe src="${buildMapEmbedUrl(textos.maps_link)}"
+          width="100%" height="320" style="border:0;"
+          allowfullscreen loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      `;
+      mapaSection.style.display = 'block';
+    }
+  } else if (texError) {
+    console.warn('textos_home:', texError.message);
   }
 
-  // Cabinas
-  const { data: cabinas } = await db
-    .from('productos')
-    .select('*')
-    .eq('categoria', 'cabina')
-    .eq('activo', true)
-    .order('orden', { ascending: true });
+  // Categorías
+  const { data: categorias } = await db
+    .from('categorias').select('*').eq('activo', true).order('orden', { ascending: true });
 
-  renderGrid(cabinas || [], 'cabinas-grid', 'cabinas-list');
+  if (!categorias || categorias.length === 0) return;
 
-  if (cabinas && cabinas[0]?.imagen_principal) {
-    document.getElementById('cat-thumb-cabinas').innerHTML =
-      `<img src="${imgUrl(cabinas[0].imagen_principal)}" style="width:100%;height:100%;object-fit:cover;">`;
-  }
+  buildCategoriaPages(categorias);
 
-  // Campers
-  const { data: campers } = await db
-    .from('productos')
-    .select('*')
-    .eq('categoria', 'camper')
-    .eq('activo', true)
-    .order('orden', { ascending: true });
+  // Cargar productos por categoría
+  for (const cat of categorias) {
+    const { data: items } = await db
+      .from('productos')
+      .select('*')
+      .eq('categoria', cat.slug)
+      .eq('activo', true)
+      .order('orden', { ascending: true });
 
-  renderGrid(campers || [], 'campers-grid', 'campers-list');
+    renderGrid(items || [], `${cat.slug}-grid`, `${cat.slug}-list`);
 
-  if (campers && campers[0]?.imagen_principal) {
-    document.getElementById('cat-thumb-campers').innerHTML =
-      `<img src="${imgUrl(campers[0].imagen_principal)}" style="width:100%;height:100%;object-fit:cover;">`;
+    if (items && items[0]?.imagen_principal) {
+      const thumb = document.getElementById(`cat-thumb-${cat.slug}`);
+      if (thumb) thumb.innerHTML =
+        `<img src="${imgUrl(items[0].imagen_principal)}" style="width:100%;height:100%;object-fit:cover;">`;
+    }
   }
 
   document.getElementById('nav-index').classList.add('active');
@@ -215,7 +255,7 @@ window.consultarWhatsapp = function () {
   }
   const item = window._fitecItemActual;
   const msg = item
-    ? `Hola, me interesa el ${item.categoria} "${item.nombre}". ¿Podrían darme más información?`
+    ? `Hola, me interesa "${item.nombre}". ¿Podrían darme más información?`
     : 'Hola, quisiera más información sobre sus productos.';
   window.open(`https://wa.me/${window._fitecTelefono}?text=${encodeURIComponent(msg)}`, '_blank');
 };
