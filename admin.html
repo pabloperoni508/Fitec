@@ -8,6 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/admin.css">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="img/favicon-192x192.png">
 </head>
 <body>
 
@@ -35,34 +38,26 @@
 
   <div class="admin-body">
 
-    <!-- TABS -->
-    <div class="tabs">
-      <button class="tab active" onclick="setTab('cabinas')">Cabinas</button>
-      <button class="tab" onclick="setTab('campers')">Campers</button>
-      <button class="tab" onclick="setTab('home')">Principal</button>
-    </div>
+    <div class="tabs" id="admin-tabs">
+  <button class="tab active" onclick="setTab('categorias-productos')">Productos</button>
+  <button class="tab" onclick="setTab('categorias-mgr')">Categorías</button>
+  <button class="tab" onclick="setTab('home')">Principal</button>
+</div>
 
-    <!-- CABINAS -->
-    <div class="section active" id="tab-cabinas">
-      <div class="section-header">
-        <h2 class="section-title">CABINAS</h2>
-        <button class="btn-sm btn-accent" onclick="openModal('cabina')">+ Nueva cabina</button>
-      </div>
-      <div class="products-grid" id="grid-cabinas">
-        <p style="color:var(--muted);padding:40px 0;">Cargando…</p>
-      </div>
-    </div>
+<!-- PRODUCTOS (tabs dinámicos por categoría) -->
+<div class="section active" id="tab-categorias-productos">
+  <div class="tabs" id="producto-tabs" style="margin-bottom:20px;"></div>
+  <div id="producto-sections"></div>
+</div>
 
-    <!-- CAMPERS -->
-    <div class="section" id="tab-campers">
-      <div class="section-header">
-        <h2 class="section-title">CAMPERS</h2>
-        <button class="btn-sm btn-accent" onclick="openModal('camper')">+ Nuevo camper</button>
-      </div>
-      <div class="products-grid" id="grid-campers">
-        <p style="color:var(--muted);padding:40px 0;">Cargando…</p>
-      </div>
-    </div>
+<!-- GESTIÓN DE CATEGORÍAS -->
+<div class="section" id="tab-categorias-mgr">
+  <div class="section-header">
+    <h2 class="section-title">CATEGORÍAS</h2>
+    <button class="btn-sm btn-accent" onclick="openCatModal()">+ Nueva categoría</button>
+  </div>
+  <div class="products-grid" id="grid-categorias"></div>
+</div>
 
     <!-- HOME -->
     <div class="section" id="tab-home">
@@ -139,8 +134,13 @@
           Abrí Google Maps, buscá la ubicación, hacé clic en "Compartir" → "Copiar enlace" y pegalo aquí.
         </span>
       </div>
-      <button class="btn-sm btn-accent" style="padding:10px 24px;font-size:14px;" onclick="saveMapsLink()">Guardar ubicación</button>
+       <button class="btn-sm btn-accent" style="padding:10px 24px;font-size:14px;" onclick="saveMapsLink()">Guardar ubicación</button>
     </div>
+
+    </div> 
+  </div>   
+</div>
+</div>
 </div>
 
 <!-- ══════════════ MODAL PRODUCTO ══════════════ -->
@@ -156,6 +156,10 @@
       <div class="form-group">
         <label>Orden (número)</label>
         <input type="number" id="f-orden" placeholder="1" value="1">
+      </div>
+      <div class="form-group">
+        <label>Categoría *</label>
+        <select id="f-categoria"></select>
       </div>
       <div class="form-group full">
         <label>Descripción principal</label>
@@ -206,7 +210,37 @@
     </div>
   </div>
 </div>
-
+<!-- MODAL CATEGORÍA -->
+<div class="modal-overlay" id="cat-modal">
+  <div class="modal" style="max-width:440px;">
+    <h2 class="modal-title" id="cat-modal-title">Nueva categoría</h2>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Nombre *</label>
+        <input type="text" id="cat-nombre" placeholder="ej: Remolques">
+      </div>
+      <div class="form-group full">
+        <label>nombre simplificado * (sin espacios, solo letras y guiones)</label>
+        <input type="text" id="cat-slug" placeholder="ej: remolques">
+        <span style="font-size:12px;color:var(--muted);margin-top:4px;">Se usa internamente. No lo cambies después de crear productos.</span>
+      </div>
+      <div class="form-group">
+        <label>Orden</label>
+        <input type="number" id="cat-orden" value="1">
+      </div>
+      <div class="form-group" style="justify-content:flex-end;padding-top:20px;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
+          <input type="checkbox" id="cat-activo" checked style="width:16px;height:16px;">
+          Visible en el sitio
+        </label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm btn-outline" style="color:var(--ink);border-color:var(--border);" onclick="closeCatModal()">Cancelar</button>
+      <button class="btn-sm btn-accent" id="cat-save-btn" onclick="saveCat()" style="padding:10px 28px;font-size:14px;">Guardar</button>
+    </div>
+  </div>
+</div>
 <!-- ══════════════ TOAST ══════════════ -->
 <div id="toast"></div>
 
