@@ -510,7 +510,7 @@ window.saveProducto = async function () {
 
     closeModal();
     toast('¡Guardado correctamente!', 'success');
-    await loadProductos(currentCategoria, currentCategoria === 'cabina' ? 'grid-cabinas' : 'grid-campers');
+    await loadProductosByCat({ slug: currentCategoria });
 
   } catch (err) {
     console.error(err);
